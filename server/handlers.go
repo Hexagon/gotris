@@ -31,7 +31,7 @@ var (
 
 )
 
-func NewTemplateHandler(assetsPath string) func(http.ResponseWriter, *http.Request) {
+func NewTemplateHandler(assetsPath string, version string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Default to [..]/index.html by checking if last character is /
@@ -42,8 +42,6 @@ func NewTemplateHandler(assetsPath string) func(http.ResponseWriter, *http.Reque
 
 		lp := filepath.Join(assetsPath, "templates", "layout.html")
 		fp := filepath.Join(assetsPath, "templates", up)
-
-		fmt.Println("%s", lp)
 
 		// Return a 404 if the base template doesn't exist
 		info, err := os.Stat(lp)
@@ -86,7 +84,7 @@ func NewTemplateHandler(assetsPath string) func(http.ResponseWriter, *http.Reque
 		}
 
 		// Render template with data from pd
-		if err := tmpl.ExecuteTemplate(w, "layout", nil); err != nil {
+		if err := tmpl.ExecuteTemplate(w, "layout", version); err != nil {
 			fmt.Println(err.Error())
 			http.Error(w, http.StatusText(500), 500)
 		}

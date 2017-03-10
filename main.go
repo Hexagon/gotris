@@ -16,7 +16,15 @@ import (
 	. "github.com/hexagon/gotris/server"
 )
 
-// Settings
+// Version
+const (
+	appMajor uint = 0
+	appMinor uint = 9
+	appPatch uint = 0
+
+	appPreRelease = "alpha"
+)
+
 var (
 	redisClient *redis.Client
 
@@ -27,6 +35,8 @@ var (
 )
 
 func main() {
+
+	fmt.Println(fmt.Sprintf("Gotris %s starting...", version()))
 
 	// Read configuration from environment
 	redisAddr = os.Getenv("GOTRIS_REDIS_ADDR")
@@ -69,7 +79,7 @@ func main() {
 	fs := http.FileServer(http.Dir(assetsPath))
 
 	// Get template handler
-	templateHandler := NewTemplateHandler(assetsPath)
+	templateHandler := NewTemplateHandler(assetsPath, version())
 	websocketHandler := NewWSHandler(redisClient)
 
 	// Handlers
@@ -86,4 +96,12 @@ func main() {
 		fmt.Println("Fatal error:", err)
 	}
 
+}
+
+func version() string {
+	if appPreRelease != "" {
+		return fmt.Sprintf("%d.%d.%d-%s", appMajor, appMinor, appPatch, appPreRelease)
+	} else {
+		return fmt.Sprintf("%d.%d.%d", appMajor, appMinor, appPatch)
+	}
 }
