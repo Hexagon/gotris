@@ -37,6 +37,9 @@ http://127.0.0.1:8080
 ## Available environment variables
 
 GOTRIS_REDIS_ADDR
+
 GOTRIS_REDIS_PASS
+
 GOTRIS_PORT
+
 GOTRIS_ASSETS
