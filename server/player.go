@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 
@@ -9,9 +9,12 @@ import (
 	//
 	"github.com/hexagon/gotris/game"
 	"github.com/hexagon/gotris/highscores"
+
+	// Redis
+	"gopkg.in/redis.v5"
 )
 
-func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string) {
+func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, redisClient *redis.Client) {
 
 	defer func() {
 		fmt.Println("Exiting Player")

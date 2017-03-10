@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	// Utils
@@ -7,9 +7,12 @@ import (
 	// Gorilla websockets
 	"github.com/gorilla/websocket"
 	"github.com/hexagon/gotris/util"
+	
+	// Redis
+	"gopkg.in/redis.v5"
 )
 
-func Client(c *websocket.Conn) {
+func Client(c *websocket.Conn, r *redis.Client) {
 
 	// Set connection options
 	wsOutChannel := make(chan string, 3)
@@ -19,7 +22,7 @@ func Client(c *websocket.Conn) {
 		close(wsInChannel)
 	}()
 
-	go Player(wsInChannel, wsOutChannel)
+	go Player(wsInChannel, wsOutChannel, r)
 	go wsWriter(c, wsOutChannel)
 
 	// Incoming websocket messages is received and parsed using the wsReader goroutine

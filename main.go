@@ -12,6 +12,8 @@ import (
 
 	// Redis
 	"gopkg.in/redis.v5"
+
+	. "github.com/hexagon/gotris/server"
 )
 
 // Settings
@@ -66,12 +68,16 @@ func main() {
 	// Serve url /static from fs ./static/
 	fs := http.FileServer(http.Dir(assetsPath))
 
+	// Get template handler
+	templateHandler := NewTemplateHandler(assetsPath)
+	websocketHandler := NewWSHandler(redisClient)
+
 	// Handlers
 	http.Handle("/static/", fs)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("/api/highscores", HighscoreHandler(redisClient))
-	http.HandleFunc("/", TemplateHandler)
-	http.HandleFunc("/ws", WSHandler)
+	http.HandleFunc("/", templateHandler)
+	http.HandleFunc("/ws", websocketHandler)
 
 	// Listen to tcp port
 	fmt.Println(fmt.Sprintf("Listening on *:%d...", listenPortInt))
