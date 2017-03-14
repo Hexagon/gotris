@@ -24,6 +24,8 @@ define([ 'util/castrato'], function (bus) {
 			exports.grid = o;
 		} else if (o.gameOver) {
 			exports.playing = false;
+		} else if (o.ready !== undefined) {
+			bus.emit('game:ready', o);
 		}
 		
 		bus.emit('game:updated');

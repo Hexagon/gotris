@@ -18,7 +18,8 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 				start: document.getElementById('btnStart')
 			},
 			containers: {
-				highscore: document.getElementById('highscore')
+				highscore: document.getElementById('highscore'),
+				message: document.getElementById('message')
 			}
 		},
 		
@@ -27,25 +28,8 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 			e.style.display = 'block';
 		},
 		
-		validateInput = function() {
-			var inputBaseClass = elements.inputs.nickname.className.replace(/ invalid/,'');
-			nickname = elements.inputs.nickname.value.trim();
-			if (nickname.length < 1) {
-				elements.inputs.nickname.className = inputBaseClass + ' invalid';
-				return false;
-			} else {
-				elements.inputs.nickname.className = inputBaseClass;
-				return true;
-			}
-		},
-		
 		startGame = function() {
-			if (validateInput()) {
-				showScreen(elements.screens.game);
-				bus.emit("player:ready", nickname);
-			} else {
-				elements.inputs.nickname.focus();
-			}
+			bus.emit("player:ready", elements.inputs.nickname.value.trim());
 		};
     
 	// Initialize viewport
@@ -55,6 +39,26 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 		viewport.redraw();
 	})
 	
+	bus.on("game:ready", function (m) {
+		if (m.ready) {
+			showScreen(elements.screens.game);
+			
+		} else {
+			// Indicate error with input box border
+			var inputBaseClass = elements.inputs.nickname.className.replace(/ invalid/,'');
+			elements.inputs.nickname.className = inputBaseClass + ' invalid';
+			
+			// Show error as text
+			elements.containers.message.className = elements.containers.message.className.replace(/hidden/,'');
+			if (m.error) {
+				elements.containers.message.innerHTML = m.error;
+			} else {
+				elements.containers.message.innerHTML = "Unknown error";
+			}
+			
+		}
+	});
+	
 	// Show login screen
 	showScreen(elements.screens.login);
 	
@@ -63,7 +67,6 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 	
 	// Start game on click of button
 	network.connect('/ws');
-	elements.inputs.nickname.addEventListener('keyup', validateInput);
 	elements.inputs.nickname.addEventListener('keydown', function (e) {
 		if (e.code == 'Enter') {
 			startGame();

@@ -4,6 +4,7 @@ import (
 
 	// Util
 	"fmt"
+	"runtime"
 	"time"
 
 	//
@@ -13,6 +14,16 @@ import (
 	// Redis
 	"gopkg.in/redis.v5"
 )
+
+func validateNickname(n string) (string, string) {
+	if len(n) < 2 {
+		return n, "Nickname too short, need to be at least 2 characters"
+	} else if len(n) > 15 {
+		return n, "Nickname too long, need to be at most 15 characters"
+	} else {
+		return n, ""
+	}
+}
 
 func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, redisClient *redis.Client) {
 
@@ -27,9 +38,8 @@ func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, r
 	// Player is not ready yet!
 	ready := false
 
+	// Incoming messages
 	for {
-
-		// Incoming messages
 		select {
 		case packet, packetOk := <-wsInChannel:
 			if packetOk {
@@ -37,10 +47,17 @@ func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, r
 
 				case "ready":
 					if n, ok := packet["nickname"]; ok {
-						g = game.NewGame(n.(string), wsOutChannel)
-						ready = true
+						nickname, err := validateNickname(n.(string))
+						if err != "" {
+							wsOutChannel <- "{ \"ready\": false, \"error\": \"" + err + "\" }"
+						} else {
+							g = game.NewGame(nickname, wsOutChannel)
+							ready = true
+							wsOutChannel <- "{ \"ready\": true }"
+						}
 					} else {
 						fmt.Println("Could not start game, nickname was missing")
+						wsOutChannel <- "{ \"ready\": false, \"error\": \"Missing or invalid nickname\" }"
 					}
 
 				case "key":
@@ -54,28 +71,32 @@ func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, r
 				return
 			}
 		default:
-			// If all channels are empty, wait for a slight delay
-			time.Sleep(2 * time.Millisecond)
-		}
 
-		if ready {
+			if ready {
 
-			// Always iterate gamefield
-			if !g.Iterate() {
-				// End condition
-				wsOutChannel <- "{ \"gameOver\": true }"
+				// Always iterate gamefield
+				if !g.Iterate() {
 
-				// Write highscore
-				highscores.Write(redisClient, highscores.Highscore{
-					Nickname: g.Nickname,
-					Score:    g.Score,
-					Level:    g.Level,
-					Lines:    g.Lines,
-					Ts:       time.Now(),
-				})
+					// End condition
+					wsOutChannel <- "{ \"gameOver\": true }"
 
-				break
+					// Write highscore
+					highscores.Write(redisClient, highscores.Highscore{
+						Nickname: g.Nickname,
+						Score:    g.Score,
+						Level:    g.Level,
+						Lines:    g.Lines,
+						Ts:       time.Now(),
+					})
+
+					break
+
+				}
+
 			}
+
+			runtime.Gosched()
+			time.Sleep(1500 * time.Microsecond)
 
 		}
 

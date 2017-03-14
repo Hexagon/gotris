@@ -79,3 +79,14 @@ footer {
     width: 640px;
     height: 480px;
 }
+
+#message {
+    color: #DD6666;
+    font-style: italic;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.hidden {
+    display: none;
+}

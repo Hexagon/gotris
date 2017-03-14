@@ -20,9 +20,9 @@ import (
 const (
 	appMajor uint = 0
 	appMinor uint = 9
-	appPatch uint = 0
+	appPatch uint = 1
 
-	appPreRelease = "alpha"
+	appPreRelease = ""
 )
 
 var (
@@ -86,8 +86,8 @@ func main() {
 	http.Handle("/static/", fs)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("/api/highscores", HighscoreHandler(redisClient))
-	http.HandleFunc("/", templateHandler)
 	http.HandleFunc("/ws", websocketHandler)
+	http.HandleFunc("/", templateHandler)
 
 	// Listen to tcp port
 	fmt.Println(fmt.Sprintf("Listening on *:%d...", listenPortInt))
