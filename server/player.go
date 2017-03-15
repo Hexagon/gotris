@@ -39,6 +39,7 @@ func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, r
 	ready := false
 
 	// Incoming messages
+PlayerLoop:
 	for {
 		select {
 		case packet, packetOk := <-wsInChannel:
@@ -72,29 +73,26 @@ func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, r
 			}
 		default:
 
-			if ready {
+			// Always iterate gamefield
+			if ready && !g.Iterate() {
 
-				// Always iterate gamefield
-				if !g.Iterate() {
+				// End condition
+				wsOutChannel <- "{ \"gameOver\": true }"
 
-					// End condition
-					wsOutChannel <- "{ \"gameOver\": true }"
+				// Write highscore
+				highscores.Write(redisClient, highscores.Highscore{
+					Nickname: g.Nickname,
+					Score:    g.Score,
+					Level:    g.Level,
+					Lines:    g.Lines,
+					Ts:       time.Now(),
+				})
 
-					// Write highscore
-					highscores.Write(redisClient, highscores.Highscore{
-						Nickname: g.Nickname,
-						Score:    g.Score,
-						Level:    g.Level,
-						Lines:    g.Lines,
-						Ts:       time.Now(),
-					})
-
-					break
-
-				}
+				break PlayerLoop
 
 			}
 
+			// I wonder, does Gosched do any good here?
 			runtime.Gosched()
 			time.Sleep(1500 * time.Microsecond)
 
