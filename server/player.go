@@ -12,7 +12,7 @@ import (
 	"github.com/hexagon/gotris/highscores"
 
 	// Redis
-	"gopkg.in/redis.v5"
+	"gopkg.in/mgo.v2"
 )
 
 func validateNickname(n string) (string, string) {
@@ -25,7 +25,7 @@ func validateNickname(n string) (string, string) {
 	}
 }
 
-func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, redisClient *redis.Client) {
+func Player(wsInChannel chan map[string]interface{}, wsOutChannel chan string, mgoSession *mgo.Session) {
 
 	defer func() {
 		fmt.Println("Exiting Player")
@@ -80,7 +80,7 @@ PlayerLoop:
 				wsOutChannel <- "{ \"gameOver\": true }"
 
 				// Write highscore
-				highscores.Write(redisClient, highscores.Highscore{
+				highscores.Write(mgoSession, highscores.Highscore{
 					Nickname: g.Nickname,
 					Score:    g.Score,
 					Level:    g.Level,

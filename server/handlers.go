@@ -11,10 +11,11 @@ import (
 	"os"
 	"path/filepath"
 
-	// Redis
-	"gopkg.in/redis.v5"
-
+	// Internal
 	"github.com/gorilla/websocket"
+	"github.com/hexagon/gotris/highscores"
+
+	"gopkg.in/mgo.v2"
 )
 
 var (
@@ -92,7 +93,7 @@ func NewTemplateHandler(assetsPath string, version string) func(http.ResponseWri
 
 }
 
-func NewWSHandler(redisClient *redis.Client) func(http.ResponseWriter, *http.Request) {
+func NewWSHandler(mgoSession *mgo.Session) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Try to upgrade connection
@@ -113,46 +114,18 @@ func NewWSHandler(redisClient *redis.Client) func(http.ResponseWriter, *http.Req
 		// Start a Client worker
 		// We do not need to spawn a new goroutine as this handler
 		// already are in it's own goroutine
-		Client(c, redisClient)
+		Client(c, mgoSession)
 	}
 }
 
-func HighscoreHandler(redisClient *redis.Client) func(http.ResponseWriter, *http.Request) {
+func HighscoreHandler(session *mgo.Session) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		// Send current highscore
-		// ToDo: Move to a separate handler and get by ajax
-		// Send high score
-		vals, rvErr := redisClient.ZRevRangeByScoreWithScores("gotris", redis.ZRangeBy{
-			Min:    "1000",
-			Max:    "+inf",
-			Offset: 0,
-			Count:  10,
-		}).Result()
-
-		if rvErr != nil {
-
-			// An error occurred, response code 500
-			fmt.Println("Redis get error: ", rvErr)
+		hs, err := highscores.Read(session)
+		if err != nil {
 			http.Error(w, http.StatusText(500), 500)
-
 		} else {
-
-			// Success, response code 200, json
-			highScoreJson := "{ \"highscore\": ["
-			first := true
-			for _, hs := range vals {
-				if !first {
-					highScoreJson += ","
-				} else {
-					first = false
-				}
-				highScoreJson += hs.Member.(string)
-
-			}
-			highScoreJson += "] }"
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(highScoreJson))
+			w.Write(hs)
 		}
 	}
 }

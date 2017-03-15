@@ -7,12 +7,12 @@ import (
 	// Gorilla websockets
 	"github.com/gorilla/websocket"
 	"github.com/hexagon/gotris/util"
-	
+
 	// Redis
-	"gopkg.in/redis.v5"
+	"gopkg.in/mgo.v2"
 )
 
-func Client(c *websocket.Conn, r *redis.Client) {
+func Client(c *websocket.Conn, r *mgo.Session) {
 
 	// Set connection options
 	wsOutChannel := make(chan string, 3)

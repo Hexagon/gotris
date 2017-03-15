@@ -9,9 +9,10 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	// Redis
-	"gopkg.in/redis.v5"
+	"gopkg.in/mgo.v2"
 
 	. "github.com/hexagon/gotris/server"
 )
@@ -20,16 +21,16 @@ import (
 const (
 	appMajor uint = 0
 	appMinor uint = 9
-	appPatch uint = 2
+	appPatch uint = 3
 
 	appPreRelease = ""
 )
 
 var (
-	redisClient *redis.Client
-
-	redisAddr  string
-	redisPass  string
+	mongoAddr  string
+	mongoUser  string
+	mongoPass  string
+	mongoDB    string
 	listenPort string
 	assetsPath string
 )
@@ -39,17 +40,22 @@ func main() {
 	fmt.Println(fmt.Sprintf("Gotris %s starting...", version()))
 
 	// Read configuration from environment
-	redisAddr = os.Getenv("GOTRIS_REDIS_ADDR")
-	redisPass = os.Getenv("GOTRIS_REDIS_PASS")
+	mongoAddr = os.Getenv("GOTRIS_MONGO_ADDR")
+	mongoUser = os.Getenv("GOTRIS_MONGO_USER")
+	mongoPass = os.Getenv("GOTRIS_MONGO_PASS")
+	mongoDB = os.Getenv("GOTRIS_MONGO_DB")
 	listenPort = os.Getenv("GOTRIS_PORT")
 	assetsPath = os.Getenv("GOTRIS_ASSETS")
 
 	// Apply defaults
-	if redisAddr == "" {
-		redisAddr = "127.0.0.1:6379"
+	if mongoAddr == "" {
+		mongoAddr = "127.0.0.1"
 	}
 	if listenPort == "" {
 		listenPort = "8080"
+	}
+	if mongoDB == "" {
+		mongoDB = "gotris"
 	}
 
 	// Convert port from string to integer
@@ -59,39 +65,39 @@ func main() {
 		return
 	}
 
-	// Connect to redis
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: redisPass, // no password set
-		DB:       0,         // use default DB
-	})
-	_, redisErr := redisClient.Ping().Result()
-
-	// Bail out if redis connection failed
-	if redisErr != nil {
-		fmt.Println("Redis connection error: ", redisErr)
-		return
-	} else {
-		fmt.Println("Connected to redis")
+	mongoDBDialInfo := &mgo.DialInfo{
+		Addrs:    []string{mongoAddr},
+		Timeout:  60 * time.Second,
+		Database: mongoDB,
+		Username: mongoUser,
+		Password: mongoPass,
 	}
+
+	mgoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer mgoSession.Close()
+
+	mgoSession.SetMode(mgo.Monotonic, true)
 
 	// Serve url /static from fs ./static/
 	fs := http.FileServer(http.Dir(assetsPath))
 
 	// Get template handler
 	templateHandler := NewTemplateHandler(assetsPath, version())
-	websocketHandler := NewWSHandler(redisClient)
+	websocketHandler := NewWSHandler(mgoSession)
 
 	// Handlers
 	http.Handle("/static/", fs)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.HandleFunc("/api/highscores", HighscoreHandler(redisClient))
+	http.HandleFunc("/api/highscores", HighscoreHandler(mgoSession))
 	http.HandleFunc("/ws", websocketHandler)
 	http.HandleFunc("/", templateHandler)
 
 	// Listen to tcp port
 	fmt.Println(fmt.Sprintf("Listening on *:%d...", listenPortInt))
-	err := http.ListenAndServe(fmt.Sprintf(":%d", listenPortInt), nil)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", listenPortInt), nil)
 	if err != nil {
 		fmt.Println("Fatal error:", err)
 	}

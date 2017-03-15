@@ -6,7 +6,7 @@ body {
     color: rgb(232,232,232);
 }
 .container {
-    max-width: 640px;
+    max-width: 960px;
 }
 button {
     background-color: #222222;
@@ -78,6 +78,7 @@ footer {
 #game {
     width: 640px;
     height: 480px;
+    margin-left: 160px;
 }
 
 #message {
