@@ -6,7 +6,7 @@ body {
     color: rgb(232,232,232);
 }
 .container {
-    max-width: 640px;
+    max-width: 960px;
 }
 button {
     background-color: #222222;
@@ -67,17 +67,14 @@ footer {
 #viewMenu {
     margin-top:calc( 50vh - 290px );
 }
-#txtNickname {
-   margin-top: 1.35rem;
-}
-
 
 #viewGame {
     margin-top:calc( 50vh - 240px );
 }
-#game {
-    width: 640px;
-    height: 480px;
+
+
+#txtNickname {
+   margin-top: 1.35rem;
 }
 
 #message {
