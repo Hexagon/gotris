@@ -18,15 +18,15 @@ cd gotris
 go get -v
 ```
 
-## Start using local MongoDB instance
+## Start with local MongoDB instance
 
 ```bash
 GOTRIS_ASSETS=./assets go run main.go
 ```
 
-## Start using remote MongoDB instance
+## Start with remote MongoDB instance
 ```bash
-GOTRIS_REDIS_ADDR=172.18.0.16 GOTRIS_ASSETS=./assets go run main.go
+GOTRIS_MONGO_ADDR=172.18.0.16 GOTRIS_ASSETS=./assets go run main.go
 ```
 
 Game will now be available at
