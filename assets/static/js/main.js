@@ -18,7 +18,8 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 				start: document.getElementById('btnStart')
 			},
 			containers: {
-				highscore: document.getElementById('highscore'),
+				hsAth: document.getElementById('hsAth'),
+				hsWeek: document.getElementById('hsWeek'),
 				message: document.getElementById('message')
 			}
 		},
@@ -86,13 +87,24 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 	        	current = 0,
 	        	max = 10;
 	        	
-			res.highscore.forEach(function(hs) {
+			if (res.Ath) res.Ath.forEach(function(hs) {
 				if (current++ < max) {
 					html += "<div class=\"highscore-entry\"><h5 class=\"right no-margin\">" + hs.Score + "</h5><h5 class=\"no-margin\">" + hs.Nickname + "</h5></div>"
 				}
 			});
 			
-			elements.containers.highscore.innerHTML = html;
+			elements.containers.hsAth.innerHTML = html;
+			
+        	html = ''; current = 0; max = 10;
+        
+        	if (res.Week) res.Week.forEach(function(hs) {
+				if (current++ < max) {
+					html += "<div class=\"highscore-entry\"><h5 class=\"right no-margin\">" + hs.Score + "</h5><h5 class=\"no-margin\">" + hs.Nickname + "</h5></div>"
+				}
+			});
+			
+			elements.containers.hsWeek.innerHTML = html;
+			
 			
 	    }
 	};

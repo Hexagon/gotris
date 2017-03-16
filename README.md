@@ -18,15 +18,15 @@ cd gotris
 go get -v
 ```
 
-## Start using local Redis instance
+## Start using local MongoDB instance
 
 ```bash
 GOTRIS_ASSETS=./assets go run main.go
 ```
 
-## Start using remote Redis instance
+## Start using remote MongoDB instance
 ```bash
-GOTRIS_REDIS_ADDR=172.18.0.12:6379 GOTRIS_ASSETS=./assets go run main.go
+GOTRIS_REDIS_ADDR=172.18.0.16 GOTRIS_ASSETS=./assets go run main.go
 ```
 
 Game will now be available at
@@ -36,10 +36,11 @@ http://127.0.0.1:8080
 
 ## Available environment variables
 
-GOTRIS_REDIS_ADDR
-
-GOTRIS_REDIS_PASS
-
-GOTRIS_PORT
-
-GOTRIS_ASSETS
+Variable | Default
+--- | ---
+GOTRIS_MONGO_ADDR | 127.0.0.1:27017
+GOTRIS_MONGO_USER | -
+GOTRIS_MONGO_PASS | -
+GOTRIS_MONGO_DB | gotris
+GOTRIS_PORT | 8080
+GOTRIS_ASSETS | -

@@ -72,9 +72,10 @@ footer {
     margin-top:calc( 50vh - 240px );
 }
 
-
-#txtNickname {
-   margin-top: 1.35rem;
+#game {
+    width: 640px;
+    height: 480px;
+    margin-left: 160px;
 }
 
 #message {

@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	// Redis
-	"gopkg.in/redis.v5"
+	// mgo MongoDB driver
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Highscore struct {
@@ -18,30 +19,47 @@ type Highscore struct {
 	Ts       time.Time
 }
 
-func (h *Highscore) Marshal() ([]byte, error) {
-	return json.Marshal(&h)
+type HighscoreMessage struct {
+	Ath  []Highscore
+	Week []Highscore
 }
 
-func Write(client *redis.Client, h Highscore) bool {
+func Bod(t time.Time) time.Time {
+	year, month, day := t.Date()
+	return time.Date(year, month, day-7, 0, 0, 0, 0, t.Location())
+}
 
-	hMarshaled, marshalErr := h.Marshal()
+func Write(session *mgo.Session, h Highscore) bool {
 
-	if marshalErr != nil {
-		fmt.Println("Marshal error", marshalErr)
-		return false
-	}
+	c := session.DB("gotris").C("highscore")
 
-	entry := redis.Z{
-		Score:  float64(h.Score),
-		Member: hMarshaled,
-	}
+	err := c.Insert(&h)
 
-	err := client.ZAdd("gotris", entry).Err()
 	if err != nil {
 		fmt.Println("Error writing highscores", err)
 		return false
 	} else {
 		return true
 	}
+
+}
+
+func Read(session *mgo.Session) ([]byte, error) {
+
+	c := session.DB("gotris").C("highscore")
+
+	var ath []Highscore
+	var week []Highscore
+
+	errAth := c.Find(bson.M{}).Sort("-score").Limit(9).All(&ath)
+	errWeek := c.Find(bson.M{"ts": bson.M{"$gt": Bod(time.Now())}}).Sort("-score").Limit(9).All(&week)
+
+	if errAth != nil {
+		return nil, errAth
+	} else if errWeek != nil {
+		return nil, errWeek
+	}
+
+	return json.Marshal(HighscoreMessage{ath, week})
 
 }
