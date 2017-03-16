@@ -9,13 +9,15 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 		elements = {
 			screens: {
 				login: document.getElementById('viewMenu'),
-				game: document.getElementById('viewGame')
+				gameSingle: document.getElementById('viewGameSingle'),
+				gameBattle: document.getElementById('viewGameBattle'),
 			},
 			inputs: {
 				nickname: document.getElementById('txtNickname')
 			},
 			buttons: {
-				start: document.getElementById('btnStart')
+				startSingle: document.getElementById('btnStartSingle'),
+				startBattle: document.getElementById('btnStartBattle'),
 			},
 			containers: {
 				hsAth: document.getElementById('hsAth'),
@@ -25,16 +27,21 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 		},
 		
 		showScreen = function (e) {
+			
 			for(var s in elements.screens) elements.screens[s].style.display = 'none';
 			e.style.display = 'block';
 		},
 		
-		startGame = function() {
+		startGameSingle = function() {
 			bus.emit("player:ready", elements.inputs.nickname.value.trim());
+		},
+		
+		startGameBattle = function() {
+			bus.emit("player:awaiting", elements.inputs.nickname.value.trim());
 		};
     
 	// Initialize viewport
-	viewport.create();
+	viewport.create('#gameSingle');
 	
 	bus.on("game:updated", function () {
 		viewport.redraw();
@@ -42,7 +49,7 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 	
 	bus.on("game:ready", function (m) {
 		if (m.ready) {
-			showScreen(elements.screens.game);
+			showScreen(elements.screens.gameSingle);
 			
 		} else {
 			// Indicate error with input box border
@@ -70,10 +77,11 @@ define(['viewport', 'network', 'util/castrato', 'game', 'util/controls'], functi
 	network.connect('/ws');
 	elements.inputs.nickname.addEventListener('keydown', function (e) {
 		if (e.code == 'Enter') {
-			startGame();
+			startGameSingle();
 		}
 	});
-	elements.buttons.start.addEventListener('click', startGame);
+	elements.buttons.startSingle.addEventListener('click', startGameSingle);
+	elements.buttons.startBattle.addEventListener('click', startGameBattle);
 	
 	// Fetch highscore
 	var xhr = new XMLHttpRequest();

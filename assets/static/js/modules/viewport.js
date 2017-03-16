@@ -12,22 +12,22 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 		drawBackground = function () {
 			
 			context.fillStyle = "rgb(64,64,64)";
-			context.fillRect(190,10,220, dimensions.height-60);
+			context.fillRect(90,10,220, dimensions.height-60);
 			
 			context.fillStyle = "rgb(32,32,32)";
-			context.fillRect(195,15,210, dimensions.height-70);
+			context.fillRect(95,15,210, dimensions.height-70);
 			
 		},
 		
 		drawHider = function () {
 			
 			// Create gradient
-			var grd=context.createLinearGradient(195,15,225,30);
+			var grd=context.createLinearGradient(85,15,115,30);
 			grd.addColorStop(0,"rgb(8,8,8)");
 			grd.addColorStop(0.8,"rgba(32,32,32,0");
 			
 			context.fillStyle = grd;
-			context.fillRect(195,15,210,30);
+			context.fillRect(95,15,85,30);
 			
 		}
 
@@ -44,7 +44,7 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 				// Destination position in pixels
 				if (dy+currentSprite.Y > 1) {
 					
-					var px = 200+(dx+currentSprite.X)*20,
+					var px = 100+(dx+currentSprite.X)*20,
 						py = 20+(dy+currentSprite.Y-2)*20;
 						
 					// Create gradient
@@ -81,7 +81,7 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 						// First two rows are hidden
 						if (y > 1 && data[x+y*10]) {
 							
-							var px = 200+x*20,
+							var px = 100+x*20,
 								py = 20+(y-2)*20;
 								
 							// Create gradient
@@ -97,7 +97,7 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 			}	
 		};
 
-	exports.create = function () {
+	exports.create = function (destination) {
 
 		// Create new canvas
 		canvas = canvasFactory();
@@ -108,7 +108,7 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 		});
 		
 		// Place canvas in DOM
-		if(!canvas.place("#game", "gf", 640, 480)) {
+		if(!canvas.place(destination, "gf", 400, 480)) {
 			console.error("Could not create canvas, bailing out.");
 			return;
 		}
@@ -136,16 +136,16 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 				context.font="200 16px Raleway";
 				context.fillStyle = "rgb(196,196,196)";
 				
-				context.fillText("QUEUE",105,50);
-				context.fillText("SCORE",430,50);
-				context.fillText("LEVEL",430,120);
-				context.fillText("LINES",430,190);
+				context.fillText("QUEUE",5,50);
+				context.fillText("SCORE",330,50);
+				context.fillText("LEVEL",330,120);
+				context.fillText("LINES",330,190);
 				
 				context.font="200 24px Raleway";
 				
-				context.fillText(game.data.Score,430,80);
-				context.fillText(game.data.Level,430,150);
-				context.fillText(game.data.Lines,430,220);
+				context.fillText(game.data.Score,330,80);
+				context.fillText(game.data.Level,330,150);
+				context.fillText(game.data.Lines,330,220);
 				
 				context.save(); context.globalAlpha = 0.8; drawTetromino({X: -5, Y: 5 }, 0, game.data.Tetrominoes[1], false, true); context.restore();
 				context.save(); context.globalAlpha = 0.6; drawTetromino({X: -5, Y: 8 }, 0, game.data.Tetrominoes[2], false, true); context.restore();
@@ -160,7 +160,7 @@ define(['util/castrato', 'dom/canvas', 'game'], function(bus, canvasFactory, gam
 				context.fillStyle = "rgba(0,0,0,0.8)";
 				context.fillRect(0,0,dimensions.width,dimensions.height);
 				
-				context.font="80px Raleway";
+				context.font="70px Raleway";
 				context.textAlign = "center";
 				
 				context.fillStyle = "rgb(196,196,196)";

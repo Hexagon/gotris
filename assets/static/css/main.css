@@ -68,14 +68,14 @@ footer {
     margin-top:calc( 50vh - 290px );
 }
 
-#viewGame {
+#viewGameSingle {
     margin-top:calc( 50vh - 240px );
 }
 
-#game {
-    width: 640px;
+#gameSingle {
+    width: 400px;
     height: 480px;
-    margin-left: 160px;
+    margin-left: 300px;
 }
 
 #message {
