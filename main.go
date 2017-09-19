@@ -21,7 +21,7 @@ import (
 const (
 	appMajor uint = 0
 	appMinor uint = 9
-	appPatch uint = 3
+	appPatch uint = 4
 
 	appPreRelease = ""
 )
