@@ -7,7 +7,7 @@ Server side Tetris implementation written in go with lazy HTML5 client.
 
 # Development setup
 
-Make sure you have a running local instance of Redis, and that Go is installed
+Make sure you have a running local instance of MongoDB, and that Go is installed
 
 ```bash
 cd <your workspace path>
